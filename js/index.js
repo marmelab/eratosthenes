@@ -1,5 +1,8 @@
 const primes_up_to = max => {
-    var sieve = [], i, j, primes = [];
+    var sieve = [],
+        i,
+        j,
+        primes = [];
     for (i = 2; i <= max; ++i) {
         if (!sieve[i]) {
             // i has not been marked -- it is prime
@@ -13,13 +16,14 @@ const primes_up_to = max => {
 };
 
 import('../crate/pkg').then(module => {
+    console.log('Starting');
     const t0Rust = performance.now();
-    const primesWithRust = module.primes_up_to(300);
+    const primesWithRust = module.primes_up_to(10000000);
     const t1Rust = performance.now();
-    console.log(`Dernier nombre premier jusqu'à 10000 en Rust : ${primesWithRust} en ${t1Rust - t0Rust} ms`);
+    console.log(`Dernier nombre premier jusqu'à 10000000 en Rust : ${t1Rust - t0Rust} ms`);
 
     const t0Js = performance.now();
-    const primesWithJs = primes_up_to(300);
+    const primesWithJs = primes_up_to(10000000);
     const t1Js = performance.now();
-    console.log(`Dernier nombre premier jusqu'à 10000 en Javascript : ${primesWithJs.pop()} en ${t1Js - t0Js} ms`);
+    console.log(`Dernier nombre premier jusqu'à 10000000 en Javascript : ${t1Js - t0Js} ms`);
 });

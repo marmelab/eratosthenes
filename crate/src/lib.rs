@@ -28,11 +28,6 @@ cfg_if! {
     }
 }
 
-#[wasm_bindgen]
-pub extern fn add_one(x: u32) -> u32 {
-    x + 1
-}
-
 pub struct PrimesIter {
     counter: u32,
     primes: Vec<u32>,
@@ -72,8 +67,18 @@ impl Iterator for PrimesIter {
 }
 
 #[wasm_bindgen]
+extern "C" {
+    type Element;
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(msg: &str);
+}
+
+
+#[wasm_bindgen]
 pub extern fn primes_up_to(limit: u32) -> Vec<u32> {
     set_panic_hook();
+
+    log("Test from Rust");
 
     PrimesIter::new().take_while(|p| p <= &limit).collect()
 }
