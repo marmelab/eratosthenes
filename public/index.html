@@ -20,7 +20,7 @@
             }
 
             .masthead.segment {
-                min-height: 700px;
+                min-height: 500px;
                 padding: 1em 0em;
             }
             .masthead .logo.item img {
@@ -104,14 +104,16 @@
                     </div>
                     <div v-if="running" class="ui segment" style="height: 8rem;">
                         <div class="ui active dimmer">
-                            <div class="ui active centered inline loader large text">Loading</div>
+                            <div class="ui active centered inline loader large text">
+                                Loading ...
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="ui vertical stripe quote segment">
                 <div class="ui equal width stackable internally celled grid">
-                    <div class="center aligned row">
+                    <div class="aligned row">
                         <div class="column">
                             <h3>JavaScript</h3>
                             <p v-if="!running && results.javascript.length === 0">
@@ -124,20 +126,40 @@
                                 <div class="line"></div>
                                 <div class="line"></div>
                             </div>
+                            <div v-if="!running && results.javascript.length > 0" class="ui">
+                                <div class="ui statistics">
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="history icon"></i>
+                                            {{ stats.javascript.totalTime }}
+                                        </div>
+                                        <div class="label">Total Time (ms)</div>
+                                    </div>
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="undo icon"></i>
+                                            {{ stats.javascript.meanTime }}
+                                        </div>
+                                        <div class="label">Mean Time Per Round (ms)</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div
                                 v-if="!running && results.javascript.length > 0"
                                 class="ui segment"
                             >
-                                <div class="ui list">
-                                    <div class="item">
-                                        <i class="right triangle icon"></i>
+                                <div class="ui relaxed divided list">
+                                    <div class="item" v-for="result in results.javascript">
+                                        <i class="large triangle middle aligned icon"></i>
                                         <div class="content">
-                                            <div class="header">Round #1</div>
-                                            <div class="description">blabla</div>
+                                            <div class="header">Round #{{ result.round }}</div>
+                                            <div class="description">
+                                                500.000 prime numbers in
+                                                <strong>{{ Math.round(result.time) }} ms</strong>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                >
                             </div>
                         </div>
                         <div class="column">
@@ -151,6 +173,41 @@
                                 <div class="line"></div>
                                 <div class="line"></div>
                                 <div class="line"></div>
+                            </div>
+                            <div v-if="!running && results.webassembly.length > 0" class="ui">
+                                <div class="ui statistics">
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="history icon"></i>
+                                            {{ stats.webassembly.totalTime }}
+                                        </div>
+                                        <div class="label">Total Time (ms)</div>
+                                    </div>
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="undo icon"></i>
+                                            {{ stats.webassembly.meanTime }}
+                                        </div>
+                                        <div class="label">Mean Time Per Round (ms)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-if="!running && results.webassembly.length > 0"
+                                class="ui segment"
+                            >
+                                <div class="ui relaxed divided list">
+                                    <div class="item" v-for="result in results.webassembly">
+                                        <i class="large triangle middle aligned icon"></i>
+                                        <div class="content">
+                                            <div class="header">Round #{{ result.round }}</div>
+                                            <div class="description">
+                                                500.000 prime numbers in
+                                                <strong>{{ Math.round(result.time) }} ms</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

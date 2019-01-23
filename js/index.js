@@ -31,6 +31,21 @@ const app = new Vue({
         stop: function(results = { javascript: [], webassembly: [] }) {
             this.running = false;
             this.results = results;
+
+            this.computeStats('javascript');
+            this.computeStats('webassembly');
+
+            console.log('stats', this.stats);
+        },
+        computeStats: function(key) {
+            const results = this.results[key];
+
+            const totalTime = Math.round(
+                results.map(r => r.time).reduce((time, total) => total + time, 0)
+            );
+            const meanTime = Math.round(totalTime / results.length);
+
+            this.stats[key] = { totalTime, meanTime };
         }
     }
 });
@@ -58,7 +73,7 @@ import('../crate/pkg').then(module => {
         console.log('Running benchmark');
         const results = { webassembly: [], javascript: [] };
 
-        for (let index = 1; index <= 2; index++) {
+        for (let index = 1; index <= 20; index++) {
             const t0Rust = performance.now();
             const primesWithRust = module.primes_up_to(500000);
             const t1Rust = performance.now();
