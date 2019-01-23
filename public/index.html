@@ -60,14 +60,6 @@
                 margin: 3em 0em;
             }
 
-            .quote.stripe.segment {
-                padding: 0em;
-            }
-            .quote.stripe.segment .grid .column {
-                padding-top: 5em;
-                padding-bottom: 5em;
-            }
-
             .footer.segment {
                 padding: 5em 0em;
             }
@@ -102,12 +94,19 @@
         </style>
     </head>
     <body class="pushable">
-        <div class="pusher">
+        <div class="pusher" id="app">
             <div class="ui inverted vertical masthead center aligned segment">
                 <div class="ui text container">
                     <h1 class="ui inverted header">Sieve of Eratosthenes</h1>
                     <h2>A JavaScript vs. WebAssembly Prime Number Generator Benchmark</h2>
-                    <div class="ui huge primary button">Run <i class="right arrow icon"></i></div>
+                    <div v-if="!running" class="ui huge primary button" v-on:click="run">
+                        Run Benchmark <i class="right arrow icon"></i>
+                    </div>
+                    <div v-if="running" class="ui segment" style="height: 8rem;">
+                        <div class="ui active dimmer">
+                            <div class="ui active centered inline loader large text">Loading</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="ui vertical stripe quote segment">
@@ -115,11 +114,44 @@
                     <div class="center aligned row">
                         <div class="column">
                             <h3>JavaScript</h3>
-                            <p>prime numbers</p>
+                            <p v-if="!running && results.javascript.length === 0">
+                                Run the tests the display the results
+                            </p>
+                            <div v-if="running" class="ui placeholder">
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                            </div>
+                            <div
+                                v-if="!running && results.javascript.length > 0"
+                                class="ui segment"
+                            >
+                                <div class="ui list">
+                                    <div class="item">
+                                        <i class="right triangle icon"></i>
+                                        <div class="content">
+                                            <div class="header">Round #1</div>
+                                            <div class="description">blabla</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                >
+                            </div>
                         </div>
                         <div class="column">
                             <h3>Rust-generated WebAssembly</h3>
-                            <p>prime numbers</p>
+                            <p v-if="!running && results.webassembly.length === 0">
+                                Run the tests the display the results
+                            </p>
+                            <div v-if="running" class="ui placeholder">
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

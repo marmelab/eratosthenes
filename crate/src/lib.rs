@@ -78,7 +78,7 @@ extern "C" {
 pub extern fn primes_up_to(limit: u32) -> Vec<u32> {
     set_panic_hook();
 
-    log("Test from Rust");
+    // log("Test from Rust");
 
     PrimesIter::new().take_while(|p| p <= &limit).collect()
 }

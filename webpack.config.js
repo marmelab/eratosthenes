@@ -22,5 +22,10 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, 'crate')
         })
-    ]
+    ],
+    resolve: {
+        alias: {
+            vue: 'vue/dist/vue.js'
+        }
+    }
 };

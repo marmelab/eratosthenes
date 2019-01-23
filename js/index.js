@@ -1,3 +1,40 @@
+import Vue from 'vue';
+import mitt from 'mitt';
+
+const emitter = mitt();
+
+const app = new Vue({
+    el: '#app',
+    data: {
+        running: false,
+        results: {
+            javascript: [],
+            webassembly: []
+        },
+        stats: {
+            javascript: {
+                totalTime: 0,
+                meanTime: 0
+            },
+            webassembly: {
+                totalTime: 0,
+                meanTime: 0
+            }
+        }
+    },
+    methods: {
+        run: function() {
+            this.running = true;
+
+            setTimeout(() => emitter.emit('run'), 0);
+        },
+        stop: function(results = { javascript: [], webassembly: [] }) {
+            this.running = false;
+            this.results = results;
+        }
+    }
+});
+
 const primes_up_to = max => {
     var sieve = [],
         i,
@@ -16,14 +53,24 @@ const primes_up_to = max => {
 };
 
 import('../crate/pkg').then(module => {
-    console.log('Starting');
-    const t0Rust = performance.now();
-    const primesWithRust = module.primes_up_to(10000000);
-    const t1Rust = performance.now();
-    console.log(`Dernier nombre premier jusqu'à 10000000 en Rust : ${t1Rust - t0Rust} ms`);
+    console.log('Loaded WebAssembly module');
+    emitter.on('run', () => {
+        console.log('Running benchmark');
+        const results = { webassembly: [], javascript: [] };
 
-    const t0Js = performance.now();
-    const primesWithJs = primes_up_to(10000000);
-    const t1Js = performance.now();
-    console.log(`Dernier nombre premier jusqu'à 10000000 en Javascript : ${t1Js - t0Js} ms`);
+        for (let index = 1; index <= 2; index++) {
+            const t0Rust = performance.now();
+            const primesWithRust = module.primes_up_to(500000);
+            const t1Rust = performance.now();
+
+            const t0Js = performance.now();
+            const primesWithJs = primes_up_to(500000);
+            const t1Js = performance.now();
+
+            results.webassembly.push({ round: index, time: t1Rust - t0Rust });
+            results.javascript.push({ round: index, time: t1Js - t0Js });
+        }
+
+        app.stop(results);
+    });
 });
