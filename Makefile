@@ -2,7 +2,6 @@ install:
 	npm install
 	cd crate && cargo update
 
-
 run:
 	npm start
 
