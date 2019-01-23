@@ -13,6 +13,13 @@ const primes_up_to = max => {
 };
 
 import('../crate/pkg').then(module => {
-    console.log('test Rust', module.primes_up_to(300));
-    console.log('test Javascript', primes_up_to(300));
+    const t0Rust = performance.now();
+    const primesWithRust = module.primes_up_to(300);
+    const t1Rust = performance.now();
+    console.log(`Dernier nombre premier jusqu'à 10000 en Rust : ${primesWithRust} en ${t1Rust - t0Rust} ms`);
+
+    const t0Js = performance.now();
+    const primesWithJs = primes_up_to(300);
+    const t1Js = performance.now();
+    console.log(`Dernier nombre premier jusqu'à 10000 en Javascript : ${primesWithJs.pop()} en ${t1Js - t0Js} ms`);
 });
