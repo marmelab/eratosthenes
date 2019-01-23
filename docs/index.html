@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <title>My awesome Rust, WebAssembly, and Webpack application</title>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="//unpkg.com/semantic-ui@2.4.2/dist/semantic.min.css"
+        />
+        <script
+            src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"
+        ></script>
+        <script src="//unpkg.com/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+        <style type="text/css">
+            .hidden.menu {
+                display: none;
+            }
+
+            .masthead.segment {
+                min-height: 500px;
+                padding: 1em 0em;
+            }
+            .masthead .logo.item img {
+                margin-right: 1em;
+            }
+            .masthead .ui.menu .ui.button {
+                margin-left: 0.5em;
+            }
+            .masthead h1.ui.header {
+                margin-top: 3em;
+                margin-bottom: 0em;
+                font-size: 4em;
+                font-weight: normal;
+            }
+            .masthead h2 {
+                font-size: 1.7em;
+                font-weight: normal;
+            }
+
+            .ui.vertical.stripe {
+                padding: 8em 0em;
+            }
+            .ui.vertical.stripe h3 {
+                font-size: 2em;
+            }
+            .ui.vertical.stripe .button + h3,
+            .ui.vertical.stripe p + h3 {
+                margin-top: 3em;
+            }
+            .ui.vertical.stripe .floated.image {
+                clear: both;
+            }
+            .ui.vertical.stripe p {
+                font-size: 1.33em;
+            }
+            .ui.vertical.stripe .horizontal.divider {
+                margin: 3em 0em;
+            }
+
+            .footer.segment {
+                padding: 5em 0em;
+            }
+
+            .secondary.pointing.menu .toc.item {
+                display: none;
+            }
+
+            @media only screen and (max-width: 700px) {
+                .ui.fixed.menu {
+                    display: none !important;
+                }
+                .secondary.pointing.menu .item,
+                .secondary.pointing.menu .menu {
+                    display: none;
+                }
+                .secondary.pointing.menu .toc.item {
+                    display: block;
+                }
+                .masthead.segment {
+                    min-height: 350px;
+                }
+                .masthead h1.ui.header {
+                    font-size: 2em;
+                    margin-top: 1.5em;
+                }
+                .masthead h2 {
+                    margin-top: 0.5em;
+                    font-size: 1.5em;
+                }
+            }
+        </style>
+    </head>
+    <body class="pushable">
+        <div class="pusher" id="app">
+            <div class="ui inverted vertical masthead center aligned segment">
+                <div class="ui text container">
+                    <h1 class="ui inverted header">Sieve of Eratosthenes</h1>
+                    <h2>A JavaScript vs. WebAssembly Prime Number Generator Benchmark</h2>
+                    <div v-if="!running" class="ui huge primary button" v-on:click="run">
+                        Run Benchmark <i class="right arrow icon"></i>
+                    </div>
+                    <div v-if="running" class="ui segment" style="height: 8rem;">
+                        <div class="ui active dimmer">
+                            <div class="ui active centered inline loader large text">
+                                Loading ...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui vertical stripe quote segment">
+                <div class="ui equal width stackable internally celled grid">
+                    <div class="aligned row">
+                        <div class="column">
+                            <h3>JavaScript</h3>
+                            <p v-if="!running && results.javascript.length === 0">
+                                Run the tests the display the results
+                            </p>
+                            <div v-if="running" class="ui placeholder">
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                            </div>
+                            <div v-if="!running && results.javascript.length > 0" class="ui">
+                                <div class="ui statistics">
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="history icon"></i>
+                                            {{ stats.javascript.totalTime }}
+                                        </div>
+                                        <div class="label">Total Time (ms)</div>
+                                    </div>
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="undo icon"></i>
+                                            {{ stats.javascript.meanTime }}
+                                        </div>
+                                        <div class="label">Mean Time Per Round (ms)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-if="!running && results.javascript.length > 0"
+                                class="ui segment"
+                            >
+                                <div class="ui relaxed divided list">
+                                    <div class="item" v-for="result in results.javascript">
+                                        <i class="large triangle middle aligned icon"></i>
+                                        <div class="content">
+                                            <div class="header">Round #{{ result.round }}</div>
+                                            <div class="description">
+                                                500.000 prime numbers in
+                                                <strong>{{ Math.round(result.time) }} ms</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <h3>Rust-generated WebAssembly</h3>
+                            <p v-if="!running && results.webassembly.length === 0">
+                                Run the tests the display the results
+                            </p>
+                            <div v-if="running" class="ui placeholder">
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                                <div class="line"></div>
+                            </div>
+                            <div v-if="!running && results.webassembly.length > 0" class="ui">
+                                <div class="ui statistics">
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="history icon"></i>
+                                            {{ stats.webassembly.totalTime }}
+                                        </div>
+                                        <div class="label">Total Time (ms)</div>
+                                    </div>
+                                    <div class="statistic">
+                                        <div class="value">
+                                            <i class="undo icon"></i>
+                                            {{ stats.webassembly.meanTime }}
+                                        </div>
+                                        <div class="label">Mean Time Per Round (ms)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-if="!running && results.webassembly.length > 0"
+                                class="ui segment"
+                            >
+                                <div class="ui relaxed divided list">
+                                    <div class="item" v-for="result in results.webassembly">
+                                        <i class="large triangle middle aligned icon"></i>
+                                        <div class="content">
+                                            <div class="header">Round #{{ result.round }}</div>
+                                            <div class="description">
+                                                500.000 prime numbers in
+                                                <strong>{{ Math.round(result.time) }} ms</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script type="text/javascript" src="main.js"></script></body>
+</html>
