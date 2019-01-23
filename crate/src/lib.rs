@@ -28,101 +28,52 @@ cfg_if! {
     }
 }
 
-// Called by our JS entry point to run the example.
-#[wasm_bindgen]
-pub fn run() -> Result<(), JsValue> {
-    set_panic_hook();
-
-    let window = web_sys::window().expect("should have a Window");
-    let document = window.document().expect("should have a Document");
-
-    let p: web_sys::Node = document.create_element("p")?.into();
-    p.set_text_content(Some("Hello from Ératosthène"));
-
-    let body = document.body().expect("should have a body");
-    let body: &web_sys::Node = body.as_ref();
-    body.append_child(&p)?;
-
-    Ok(())
-}
-
 #[wasm_bindgen]
 pub extern fn add_one(x: u32) -> u32 {
     x + 1
 }
 
-pub struct Primes {
+pub struct PrimesIter {
+    counter: u32,
     primes: Vec<u32>,
-    current: u32,
 }
 
-pub fn primes() -> Primes {
-    Primes {
-        primes: vec![],
-        current: 2,
-    }
-}
-
-impl Iterator for Primes {
-    type Item = u32;
-
-    fn next(&mut self) -> Option<u32> {
-        for i in self.current..u32::max_value() {
-            if self.primes.iter().all(|x| i % x != 0) {
-                self.primes.push(i);
-                self.current = i+1;
-                return Some(i);
-            }
-        }
-
-        panic!("Integer overflowed!")
-    }
-}
-
-pub struct Factorize {
-    n: u32,
-    primes: Peekable<Primes>,
-}
-
-impl Iterator for Factorize {
-    type Item = u32;
-
-    fn next(&mut self) -> Option<u32> {
-        match (self.n, self.primes.peek().cloned()) {
-            (1, _) => None,
-
-            (m, Some(p)) => {
-                if m < p * p {
-                    self.n = 1;
-                    return Some(m);
-                }
-
-                let (q, r) = (m / p, m % p);
-
-                if r == 0 {
-                    self.n = q;
-                    Some(p)
-                } else {
-                    self.primes.next();
-                    self.next()
-                }
-            }
-
-            (_, None) => {
-                unreachable!()
-            }
+impl PrimesIter {
+    pub fn new() -> Self {
+        PrimesIter {
+            counter: 2,
+            primes: Vec::new(),
         }
     }
+
+    fn is_prime(&self, n: u32) -> bool {
+        for prime in self.primes.iter().take_while(|&p| p * p <= n) {
+            if n % prime == 0 {
+                return false;
+            }
+        }
+        true
+    }
 }
 
-fn factorize(n: u32) -> Factorize {
-    Factorize {
-        n: n,
-        primes: primes().peekable(),
+impl Iterator for PrimesIter {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut counter = self.counter;
+        while ! self.is_prime(counter) {
+            counter += 1;
+        }
+        self.primes.push(counter);
+
+        self.counter = counter + 1;
+        Some(counter)
     }
 }
 
 #[wasm_bindgen]
-pub extern fn primers(n: u32) -> u32 {
-    factorize(n).n
+pub extern fn primes_up_to(limit: u32) -> Vec<u32> {
+    set_panic_hook();
+
+    PrimesIter::new().take_while(|p| p <= &limit).collect()
 }
